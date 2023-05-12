@@ -12,8 +12,8 @@ public class RoslynClassParserForm : Form
     private TextBox output;
     private Button selectDirectory;
     private CheckBox checkProperties;
-    private CheckBox checkMethods;
     private CheckBox checkFields;
+    private CheckBox checkMethods;
     private CheckBox checkStructs;
 
     public RoslynClassParserForm()
@@ -22,31 +22,51 @@ public class RoslynClassParserForm : Form
         output = new TextBox
         {
             Multiline = true,
+            Dock = DockStyle.Fill,
+            ScrollBars = ScrollBars.Vertical,
+        };
+        checkProperties = new CheckBox
+        {
+            Text = "Properties",
+            Checked = true,
+            AutoSize = true
+        };
+        checkFields = new CheckBox
+        {
+            Text = "Fields",
+            Checked = true,
+            AutoSize = true
+        };
+        checkMethods = new CheckBox
+        {
+            Text = "Methods",
+            Checked = true,
+            AutoSize = true
+        };
+        checkStructs = new CheckBox
+        {
+            Text = "Structs",
+            Checked = true,
+            AutoSize = true
+        };
+        var sidePanel = new FlowLayoutPanel
+        {
             Dock = DockStyle.Left,
-            ScrollBars = ScrollBars.Vertical
+            FlowDirection = FlowDirection.TopDown,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Padding = new Padding(5),
         };
-        
+        sidePanel.Controls.AddRange(
+            new Control[] { checkProperties, checkFields, checkMethods, checkStructs }
+        );
 
-        // Define the checkboxes in a side panel
-        var sidePanel = new Panel
-        {
-            Dock = DockStyle.Right,
-            Width = 200
-        };
-
-
-
-
-        selectDirectory = new Button
-        {
-            Text = "Select Directory",
-            Dock = DockStyle.Top
-        };
-
+        selectDirectory = new Button { Text = "Select Directory", Dock = DockStyle.Top };
         selectDirectory.Click += SelectDirectory_Click;
 
-        this.Controls.Add(output);
-        this.Controls.Add(selectDirectory);
+        var mainPanel = new Panel { Dock = DockStyle.Fill, Controls = { output, selectDirectory } };
+
+        this.Controls.AddRange(new Control[] { mainPanel, sidePanel });
     }
 
     private void SelectDirectory_Click(object sender, EventArgs e)
@@ -96,7 +116,7 @@ public class RoslynClassParserForm : Form
             if (checkProperties.Checked)
             {
                 var properties = classDecl.DescendantNodes().OfType<PropertyDeclarationSyntax>();
-                foreach(var property in properties)
+                foreach (var property in properties)
                 {
                     var type = property.Type.ToString();
                     var name = property.Identifier.ValueText;
@@ -125,10 +145,7 @@ public class RoslynClassParserForm : Form
         }
     }
 
-    private void InitializeComponent()
-    {
-
-    }
+    private void InitializeComponent() { }
 
     private void AppendLine(string text)
     {
