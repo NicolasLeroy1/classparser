@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -10,15 +11,31 @@ public class RoslynClassParserForm : Form
 {
     private TextBox output;
     private Button selectDirectory;
+    private CheckBox checkProperties;
+    private CheckBox checkMethods;
+    private CheckBox checkFields;
+    private CheckBox checkStructs;
 
     public RoslynClassParserForm()
     {
+        // Define the output textbox
         output = new TextBox
         {
             Multiline = true,
-            Dock = DockStyle.Fill,
+            Dock = DockStyle.Left,
             ScrollBars = ScrollBars.Vertical
         };
+        
+
+        // Define the checkboxes in a side panel
+        var sidePanel = new Panel
+        {
+            Dock = DockStyle.Right,
+            Width = 200
+        };
+
+
+
 
         selectDirectory = new Button
         {
@@ -66,24 +83,51 @@ public class RoslynClassParserForm : Form
         {
             AppendLine("Class: " + classDecl.Identifier.ValueText);
 
-            var properties = classDecl.DescendantNodes().OfType<PropertyDeclarationSyntax>();
-            foreach (var property in properties)
+            if (checkFields.Checked)
             {
-                var type = property.Type.ToString();
-                var name = property.Identifier.ValueText;
-
-                AppendLine($"\tProperty: {name}, Type: {type}");
+                var fields = classDecl.DescendantNodes().OfType<FieldDeclarationSyntax>();
+                foreach (var field in fields)
+                {
+                    var type = field.Declaration.Type.ToString();
+                    var name = field.Declaration.Variables.First().Identifier.ValueText;
+                    AppendLine($"\tField: {name}, Type: {type}");
+                }
             }
-
-            var methods = classDecl.DescendantNodes().OfType<MethodDeclarationSyntax>();
-            foreach (var method in methods)
+            if (checkProperties.Checked)
             {
-                var returnType = method.ReturnType.ToString();
-                var name = method.Identifier.ValueText;
-
-                AppendLine($"\tMethod: {name}, Return Type: {returnType}");
+                var properties = classDecl.DescendantNodes().OfType<PropertyDeclarationSyntax>();
+                foreach(var property in properties)
+                {
+                    var type = property.Type.ToString();
+                    var name = property.Identifier.ValueText;
+                    AppendLine($"\tProperty: {name}, Type: {type}");
+                }
+            }
+            if (checkMethods.Checked)
+            {
+                var methods = classDecl.DescendantNodes().OfType<MethodDeclarationSyntax>();
+                foreach (var method in methods)
+                {
+                    var name = method.Identifier.ValueText;
+                    var returnType = method.ReturnType.ToString();
+                    AppendLine($"\tMethod: {name}, Return Type: {returnType}");
+                }
+            }
+            if (checkStructs.Checked)
+            {
+                var structs = classDecl.DescendantNodes().OfType<StructDeclarationSyntax>();
+                foreach (var structDecl in structs)
+                {
+                    var name = structDecl.Identifier.ValueText;
+                    AppendLine($"\tStruct: {name}");
+                }
             }
         }
+    }
+
+    private void InitializeComponent()
+    {
+
     }
 
     private void AppendLine(string text)
